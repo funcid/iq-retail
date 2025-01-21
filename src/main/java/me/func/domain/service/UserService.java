@@ -2,6 +2,7 @@ package me.func.domain.service;
 
 import lombok.RequiredArgsConstructor;
 import me.func.infrastructure.dao.User;
+import me.func.infrastructure.exception.user.UserNotFoundException;
 import me.func.infrastructure.repository.UserRepository;
 import me.func.adapter.mapper.UserMapper;
 import me.func.infrastructure.security.UserDetailsImpl;
@@ -26,7 +27,7 @@ public class UserService implements UserDetailsService {
 
     public User getUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(UserNotFoundException::new);
     }
 
     public Page<User> searchUsers(LocalDate dateOfBirth, String phone, String name, String email, Pageable pageable) {
@@ -38,7 +39,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         User user = userRepository.findByEmailOrPhone(login)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with login: " + login));
+                .orElseThrow(UserNotFoundException::new);
         return new UserDetailsImpl(user);
     }
 

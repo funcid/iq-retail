@@ -3,6 +3,7 @@ package me.func.domain.service;
 import lombok.extern.slf4j.Slf4j;
 import me.func.infrastructure.dao.Account;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,7 +15,8 @@ public class AccountBalanceUpdateService {
     private static final BigDecimal INCREASE_RATE = new BigDecimal("0.10");
     private static final BigDecimal MAX_INCREASE_RATE = new BigDecimal("2.07");
 
-    void updateAccountBalance(Account account) {
+    @Transactional
+    public void updateAccountBalance(Account account) {
         BigDecimal currentBalance = account.getBalance();
         BigDecimal initialBalance = account.getInitialBalance();
         BigDecimal maxAllowedBalance = initialBalance.multiply(BigDecimal.ONE.add(MAX_INCREASE_RATE));

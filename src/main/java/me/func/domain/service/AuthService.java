@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.func.adapter.dto.auth.AuthRequest;
 import me.func.adapter.dto.auth.AuthResponse;
 import me.func.infrastructure.dao.User;
+import me.func.infrastructure.exception.user.UserNotFoundException;
 import me.func.infrastructure.repository.UserRepository;
 import me.func.infrastructure.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +30,7 @@ public class AuthService {
         );
         
         User user = userRepository.findByEmailOrPhone(request.getLogin())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(UserNotFoundException::new);
         
         String token = jwtService.generateToken(user.getId());
 

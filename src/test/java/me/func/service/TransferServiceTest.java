@@ -4,6 +4,10 @@ import me.func.infrastructure.dao.Account;
 import me.func.infrastructure.dao.User;
 import me.func.domain.service.TransferService;
 import me.func.domain.service.UserService;
+import me.func.infrastructure.exception.transfer.InsufficientFundsException;
+import me.func.infrastructure.exception.transfer.InvalidTransferAmountException;
+import me.func.infrastructure.exception.transfer.SameAccountTransferException;
+import me.func.infrastructure.exception.user.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,8 +67,7 @@ class TransferServiceTest {
         BigDecimal transferAmount = new BigDecimal("100.00");
 
         assertThatThrownBy(() -> transferService.transfer(FROM_USER_ID, FROM_USER_ID, transferAmount))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Cannot transfer to the same account");
+                .isInstanceOf(SameAccountTransferException.class);
 
         verify(userService, never()).getUser(any());
     }
@@ -74,8 +77,7 @@ class TransferServiceTest {
         BigDecimal transferAmount = new BigDecimal("-100.00");
 
         assertThatThrownBy(() -> transferService.transfer(FROM_USER_ID, TO_USER_ID, transferAmount))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Transfer amount must be positive");
+                .isInstanceOf(InvalidTransferAmountException.class);
 
         verify(userService, never()).getUser(any());
     }
@@ -85,8 +87,7 @@ class TransferServiceTest {
         BigDecimal transferAmount = BigDecimal.ZERO;
 
         assertThatThrownBy(() -> transferService.transfer(FROM_USER_ID, TO_USER_ID, transferAmount))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Transfer amount must be positive");
+                .isInstanceOf(InvalidTransferAmountException.class);
 
         verify(userService, never()).getUser(any());
     }
@@ -98,8 +99,7 @@ class TransferServiceTest {
         when(userService.getUser(TO_USER_ID)).thenReturn(toUser);
 
         assertThatThrownBy(() -> transferService.transfer(FROM_USER_ID, TO_USER_ID, transferAmount))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Insufficient funds");
+                .isInstanceOf(InsufficientFundsException.class);
 
         assertThat(fromAccount.getBalance()).isEqualByComparingTo(INITIAL_FROM_BALANCE);
         assertThat(toAccount.getBalance()).isEqualByComparingTo(INITIAL_TO_BALANCE);
@@ -108,11 +108,10 @@ class TransferServiceTest {
     @Test
     void shouldThrowExceptionWhenUserNotFound() {
         BigDecimal transferAmount = new BigDecimal("100.00");
-        when(userService.getUser(FROM_USER_ID)).thenThrow(new RuntimeException("User not found"));
+        when(userService.getUser(FROM_USER_ID)).thenThrow(UserNotFoundException.class);
 
         assertThatThrownBy(() -> transferService.transfer(FROM_USER_ID, TO_USER_ID, transferAmount))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("User not found");
+                .isInstanceOf(UserNotFoundException.class);
 
         assertThat(fromAccount.getBalance()).isEqualByComparingTo(INITIAL_FROM_BALANCE);
         assertThat(toAccount.getBalance()).isEqualByComparingTo(INITIAL_TO_BALANCE);

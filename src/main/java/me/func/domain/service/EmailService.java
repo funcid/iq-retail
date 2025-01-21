@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.func.infrastructure.dao.EmailData;
 import me.func.infrastructure.dao.User;
+import me.func.infrastructure.exception.email.EmailAlreadyExistsException;
+import me.func.infrastructure.exception.email.EmailNotFoundException;
 import me.func.infrastructure.repository.EmailDataRepository;
 import me.func.infrastructure.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -24,10 +26,10 @@ public class EmailService {
         EmailData emailData = user.getEmails().stream()
                 .filter(e -> e.getEmail().equals(oldEmail))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Email not found"));
+                .orElseThrow(EmailNotFoundException::new);
 
         if (userRepository.existsByEmail(newEmail)) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new EmailAlreadyExistsException();
         }
 
         emailData.setEmail(newEmail);
@@ -38,7 +40,7 @@ public class EmailService {
         User user = userService.getUser(userId);
 
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new EmailAlreadyExistsException();
         }
 
         EmailData emailData = new EmailData();

@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.func.infrastructure.dao.PhoneData;
 import me.func.infrastructure.dao.User;
+import me.func.infrastructure.exception.phone.PhoneAlreadyExistsException;
+import me.func.infrastructure.exception.phone.PhoneNotFoundException;
 import me.func.infrastructure.repository.PhoneDataRepository;
 import me.func.infrastructure.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -24,10 +26,10 @@ public class PhoneService {
         PhoneData phoneData = user.getPhones().stream()
                 .filter(p -> p.getPhone().equals(oldPhone))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Phone not found"));
+                .orElseThrow(PhoneNotFoundException::new);
 
         if (userRepository.existsByPhone(newPhone)) {
-            throw new IllegalArgumentException("Phone already exists");
+            throw new PhoneAlreadyExistsException();
         }
 
         phoneData.setPhone(newPhone);
@@ -38,7 +40,7 @@ public class PhoneService {
         User user = userService.getUser(userId);
 
         if (userRepository.existsByPhone(phone)) {
-            throw new IllegalArgumentException("Phone already exists");
+            throw new PhoneAlreadyExistsException();
         }
 
         PhoneData phoneData = new PhoneData();

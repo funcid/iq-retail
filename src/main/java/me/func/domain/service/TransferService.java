@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.func.infrastructure.dao.Account;
 import me.func.infrastructure.dao.User;
+import me.func.infrastructure.exception.transfer.InsufficientFundsException;
+import me.func.infrastructure.exception.transfer.InvalidTransferAmountException;
+import me.func.infrastructure.exception.transfer.SameAccountTransferException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +21,11 @@ public class TransferService {
 
     public void transfer(Long fromUserId, Long toUserId, BigDecimal amount) {
         if (fromUserId.equals(toUserId)) {
-            throw new IllegalArgumentException("Cannot transfer to the same account");
+            throw new SameAccountTransferException();
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Transfer amount must be positive");
+            throw new InvalidTransferAmountException();
         }
 
         User fromUser = userService.getUser(fromUserId);
@@ -32,7 +35,7 @@ public class TransferService {
         Account toAccount = toUser.getAccount();
 
         if (fromAccount.getBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Insufficient funds");
+            throw new InsufficientFundsException();
         }
 
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
