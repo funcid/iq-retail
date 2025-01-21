@@ -12,12 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EmailService {
     private final EmailDataRepository emailDataRepository;
     private final UserRepository userRepository;
     private final UserService userService;
 
-    @Transactional
     public void updateEmail(Long userId, String oldEmail, String newEmail) {
         User user = userService.getUser(userId);
         
@@ -34,7 +34,6 @@ public class EmailService {
         log.debug("Email successfully updated to {} for user {}", newEmail, userId);
     }
 
-    @Transactional
     public void addEmail(Long userId, String email) {
         User user = userService.getUser(userId);
 
@@ -50,7 +49,6 @@ public class EmailService {
         log.debug("Email {} successfully added to user {}", email, userId);
     }
 
-    @Transactional
     public void deleteEmail(Long userId, String email) {
         emailDataRepository.deleteByUserIdAndEmail(userId, email);
         log.debug("Email {} successfully deleted from user {}", email, userId);

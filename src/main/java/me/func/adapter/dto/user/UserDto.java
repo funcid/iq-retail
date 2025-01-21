@@ -5,7 +5,6 @@ import me.func.adapter.dto.email.EmailDataDto;
 import me.func.adapter.dto.phone.PhoneDataDto;
 import java.time.LocalDate;
 import java.util.List;
-import java.io.Serializable;
 
 @Data
 public class UserDto {

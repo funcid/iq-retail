@@ -12,12 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PhoneService {
     private final PhoneDataRepository phoneDataRepository;
     private final UserRepository userRepository;
     private final UserService userService;
 
-    @Transactional
     public void updatePhone(Long userId, String oldPhone, String newPhone) {
         User user = userService.getUser(userId);
         
@@ -34,7 +34,6 @@ public class PhoneService {
         log.debug("Phone successfully updated to {} for user {}", newPhone, userId);
     }
 
-    @Transactional
     public void addPhone(Long userId, String phone) {
         User user = userService.getUser(userId);
 
@@ -50,7 +49,6 @@ public class PhoneService {
         log.debug("Phone {} successfully added to user {}", phone, userId);
     }
 
-    @Transactional
     public void deletePhone(Long userId, String phone) {
         phoneDataRepository.deleteByUserIdAndPhone(userId, phone);
         log.debug("Phone {} successfully deleted from user {}", phone, userId);
